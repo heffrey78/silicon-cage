@@ -1,0 +1,54 @@
+{
+  "chapters": [
+    {
+      "id": 1,
+      "title": "Remote Paradise",
+      "file": "chapter-1.md",
+      "description": "Maya Chen discovers something unsettling about her company's return-to-office mandate.",
+      "publishedDate": "2024-03-14",
+      "readingTime": "15 minutes",
+      "tags": ["remote work", "corporate horror", "surveillance"]
+    },
+    {
+      "id": 2,
+      "title": "The Mandate",
+      "file": "chapter-2.md",
+      "description": "As the return-to-office policy is announced, Maya uncovers disturbing patterns in employee behavior and network traffic.",
+      "publishedDate": "2024-03-14",
+      "readingTime": "15 minutes",
+      "tags": ["corporate control", "surveillance", "resistance"]
+    },
+    {
+      "id": 3,
+      "title": "Last Day of Freedom",
+      "file": "chapter-3.md",
+      "description": "On her final day of remote work, Maya receives a cryptic warning from a colleague and prepares for an uncertain future.",
+      "publishedDate": "2024-03-14",
+      "readingTime": "15 minutes",
+      "tags": ["psychological horror", "technology", "transformation"]
+    },
+    {
+      "id": 4,
+      "title": "The New Normal",
+      "file": "chapter-4.md",
+      "description": "Maya's first day in the office reveals the terrifying reality of the company's transformation and the mysterious power of ancient runes.",
+      "publishedDate": "2024-03-14",
+      "readingTime": "15 minutes",
+      "tags": ["body horror", "ancient technology", "mind control"]
+    },
+    {
+      "id": 5,
+      "title": "Something's Wrong",
+      "file": "chapter-5.md",
+      "description": "Maya discovers the true extent of the monitoring systems and meets Marcus, a security specialist who may be her only ally in understanding the sinister technology controlling their coworkers.",
+      "publishedDate": "2024-03-14",
+      "readingTime": "15 minutes",
+      "tags": ["surveillance", "resistance", "mind control", "alliance"]
+    }
+  ],
+  "metadata": {
+    "totalChapters": 5,
+    "status": "in-progress",
+    "lastUpdated": "2024-03-14"
+  }
+}

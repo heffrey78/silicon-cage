@@ -1,0 +1,11 @@
+# Allow all web crawlers
+User-agent: *
+Allow: /
+
+# Sitemap location (to be added when deployed)
+# Sitemap: https://example.com/sitemap.xml
+
+# Prevent crawling of any sensitive paths
+Disallow: /api/
+Disallow: /admin/
+Disallow: /private/

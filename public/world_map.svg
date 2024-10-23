@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="800" height="600" xmlns="http://www.w3.org/2000/svg">
+    <!-- Background -->
+    <rect width="800" height="600" fill="#f0f0f0"/>
+    
+    <!-- Campus Boundary -->
+    <path d="M100 100 L700 100 L700 500 L100 500 Z" fill="none" stroke="#333" stroke-width="3"/>
+    
+    <!-- Main Office Building -->
+    <rect x="250" y="200" width="300" height="200" fill="#fff" stroke="#666"/>
+    <text x="400" y="300" text-anchor="middle" font-family="Arial" font-size="14">TechCorp HQ</text>
+    
+    <!-- Parking Structures -->
+    <rect x="120" y="150" width="100" height="150" fill="#ddd" stroke="#666"/>
+    <text x="170" y="225" text-anchor="middle" font-family="Arial" font-size="12">Parking A</text>
+    
+    <rect x="580" y="150" width="100" height="150" fill="#ddd" stroke="#666"/>
+    <text x="630" y="225" text-anchor="middle" font-family="Arial" font-size="12">Parking B</text>
+    
+    <!-- Recreation Areas -->
+    <circle cx="400" cy="450" r="30" fill="#90EE90" stroke="#666"/>
+    <text x="400" y="455" text-anchor="middle" font-family="Arial" font-size="10">Zen Garden</text>
+    
+    <!-- Amenities Building -->
+    <rect x="250" y="120" width="150" height="60" fill="#fff" stroke="#666"/>
+    <text x="325" y="155" text-anchor="middle" font-family="Arial" font-size="12">Wellness Center</text>
+    
+    <!-- Security Checkpoints -->
+    <circle cx="250" cy="100" r="5" fill="red"/>
+    <circle cx="550" cy="100" r="5" fill="red"/>
+    <circle cx="250" cy="500" r="5" fill="red"/>
+    <circle cx="550" cy="500" r="5" fill="red"/>
+    
+    <!-- Roads -->
+    <path d="M0 300 L100 300" stroke="#666" stroke-width="2"/>
+    <path d="M700 300 L800 300" stroke="#666" stroke-width="2"/>
+    
+    <!-- Legend -->
+    <rect x="620" y="400" width="150" height="120" fill="white" stroke="#333"/>
+    <text x="630" y="420" font-family="Arial" font-size="10">Legend:</text>
+    <circle cx="640" y="440" r="5" fill="red"/>
+    <text x="655" y="443" font-family="Arial" font-size="10">Security Checkpoint</text>
+    <rect x="635" y="455" width="10" height="10" fill="#fff" stroke="#666"/>
+    <text x="655" y="463" font-family="Arial" font-size="10">Buildings</text>
+    <rect x="635" y="475" width="10" height="10" fill="#90EE90"/>
+    <text x="655" y="483" font-family="Arial" font-size="10">Green Spaces</text>
+    <rect x="635" y="495" width="10" height="10" fill="#ddd"/>
+    <text x="655" y="503" font-family="Arial" font-size="10">Parking</text>
+    
+    <!-- Title -->
+    <text x="400" y="50" text-anchor="middle" font-family="Arial" font-size="20" font-weight="bold">TechCorp Ohio Campus</text>
+</svg>
