@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 import { Section, Card, Title, Button, FlexContainer } from '../styles/layout';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -164,6 +164,7 @@ const ErrorMessage = styled.div`
 const Chapters = () => {
   const { chapterId } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const [isListView, setIsListView] = useState(!chapterId);
   const [showShortcuts, setShowShortcuts] = useState(false);
   const { readingProgress, markChapterComplete } = useReadingProgressContext();
@@ -174,63 +175,69 @@ const Chapters = () => {
     error,
     currentChapter,
     loadChapter,
-    navigateChapter,
+    getAdjacentChapterId,
     canNavigate
   } = useChapters();
 
   // Load chapter from route parameter
   useEffect(() => {
-    console.log('Route chapterId:', chapterId);
-    if (chapterId) {
-      console.log('Loading chapter from route:', chapterId);
-      loadChapter(parseInt(chapterId, 10));
-      setIsListView(false);
+    console.log('Chapter effect running:', { 
+      chapterId, 
+      chaptersLength: chapters.length, 
+      currentChapterId: currentChapter?.id,
+      pathname: location.pathname
+    });
+    
+    if (chapterId && chapters.length > 0) {
+      const targetChapterId = parseInt(chapterId, 10);
+      if (!currentChapter || currentChapter.id !== targetChapterId) {
+        console.log('Loading chapter:', targetChapterId);
+        loadChapter(targetChapterId);
+        setIsListView(false);
+      }
     }
-  }, [chapterId, loadChapter]);
+  }, [chapterId, loadChapter, currentChapter, chapters, location]);
+
+  const handleNavigate = useCallback((direction) => {
+    console.log('handleNavigate called:', { 
+      direction, 
+      canNavigatePrev: canNavigate('prev'),
+      canNavigateNext: canNavigate('next')
+    });
+
+    const nextChapterId = getAdjacentChapterId(direction);
+    if (nextChapterId) {
+      console.log('Navigating to chapter:', nextChapterId);
+      navigate(`/chapters/${nextChapterId}`);
+    }
+  }, [navigate, getAdjacentChapterId, canNavigate]);
 
   const { shortcuts } = useReaderKeyboardShortcuts({
     isReading: !isListView,
-    onNavigatePrev: () => navigateChapter('prev'),
-    onNavigateNext: () => navigateChapter('next'),
+    onNavigatePrev: () => handleNavigate('prev'),
+    onNavigateNext: () => handleNavigate('next'),
     onToggleView: () => setIsListView(true),
     canNavigatePrev: canNavigate('prev'),
     canNavigateNext: canNavigate('next'),
   });
 
   const handleChapterSelect = useCallback(async (id) => {
-    console.log('Chapter selected:', id);
-    try {
-      navigate(`/chapters/${id}`);
-    } catch (err) {
-      console.error('Error selecting chapter:', err);
-    }
+    console.log('Selecting chapter:', id);
+    navigate(`/chapters/${id}`);
   }, [navigate]);
 
   const handleBackToList = useCallback(() => {
-    console.log('Returning to chapter list');
     navigate('/chapters');
     setIsListView(true);
   }, [navigate]);
 
-  console.log('Current state:', {
-    isListView,
-    loading,
-    error,
-    chapterId,
-    currentChapter: currentChapter ? {
-      id: currentChapter.id,
-      title: currentChapter.title,
-      hasContent: Boolean(currentChapter.content)
-    } : null
-  });
-
-  if (loading && !currentChapter) {
-    console.log('Showing loading state');
+  // Show loading only when initially loading chapters list
+  if (loading && !chapters.length && !currentChapter) {
     return <Loading status="Loading Chapters" />;
   }
 
-  if (error && !currentChapter) {
-    console.log('Showing error state:', error);
+  // Show error only when there's no data to show
+  if (error && !chapters.length && !currentChapter) {
     return (
       <Section>
         <ErrorMessage>
@@ -245,7 +252,6 @@ const Chapters = () => {
   }
 
   if (isListView) {
-    console.log('Rendering chapter list view');
     return (
       <Section>
         <Title>Chapters</Title>
@@ -253,10 +259,7 @@ const Chapters = () => {
           {chapters.map(chapter => (
             <ChapterCard 
               key={chapter.id} 
-              onClick={() => {
-                console.log('Chapter card clicked:', chapter.id);
-                handleChapterSelect(chapter.id);
-              }}
+              onClick={() => handleChapterSelect(chapter.id)}
             >
               <h3>Chapter {chapter.id}</h3>
               <h4>{chapter.title}</h4>
@@ -285,86 +288,82 @@ const Chapters = () => {
     );
   }
 
-  if (!currentChapter || loading) {
-    console.log('Showing chapter loading state');
+  // Show loading while waiting for chapters to load
+  if (loading && chapterId) {
     return <Loading status="Loading Chapter" />;
   }
 
-  if (error) {
-    console.log('Showing chapter error state:', error);
+  // Keep showing current chapter while loading next/prev
+  if (currentChapter) {
+    const canNavigatePrev = canNavigate('prev');
+    const canNavigateNext = canNavigate('next');
+    
+    console.log('Navigation state:', { 
+      currentChapterId: currentChapter.id,
+      loading,
+      canNavigatePrev,
+      canNavigateNext,
+      pathname: location.pathname
+    });
+
     return (
       <Section>
-        <ErrorMessage>
-          <h2>Error Loading Chapter</h2>
-          <p>{error}</p>
-          <Button onClick={handleBackToList}>
-            Return to Chapter List
+        <Button 
+          onClick={handleBackToList} 
+          style={{ marginBottom: '2rem', marginLeft: '2rem' }}
+        >
+          Back to Chapter List
+        </Button>
+        
+        <ChapterContainer>
+          <ChapterTitle>
+            Chapter {currentChapter.id}: {currentChapter.title}
+          </ChapterTitle>
+          {currentChapter.content ? (
+            <MarkdownRenderer content={currentChapter.content} />
+          ) : (
+            <ErrorMessage>No content available for this chapter</ErrorMessage>
+          )}
+        </ChapterContainer>
+
+        <ChapterNav justify="center">
+          <NavButton
+            onClick={() => handleNavigate('prev')}
+            disabled={!canNavigatePrev || loading}
+          >
+            <FontAwesomeIcon icon={faChevronLeft} /> Previous
+          </NavButton>
+          <Button
+            onClick={() => markChapterComplete(currentChapter.id)}
+            disabled={readingProgress.chaptersCompleted.includes(currentChapter.id)}
+            style={{ margin: '0 1rem' }}
+          >
+            Mark as Complete
           </Button>
-        </ErrorMessage>
+          <NavButton
+            onClick={() => handleNavigate('next')}
+            disabled={!canNavigateNext || loading}
+          >
+            Next <FontAwesomeIcon icon={faChevronRight} />
+          </NavButton>
+        </ChapterNav>
+
+        <HelpButton onClick={() => setShowShortcuts(true)}>
+          <FontAwesomeIcon icon={faKeyboard} />
+        </HelpButton>
+        
+        {showShortcuts && (
+          <KeyboardShortcutsHelp 
+            shortcuts={shortcuts}
+            onClose={() => setShowShortcuts(false)}
+          />
+        )}
       </Section>
     );
   }
 
-  console.log('Rendering chapter view:', {
-    id: currentChapter.id,
-    title: currentChapter.title,
-    contentLength: currentChapter.content?.length
-  });
-
-  return (
-    <Section>
-      <Button 
-        onClick={handleBackToList} 
-        style={{ marginBottom: '2rem', marginLeft: '2rem' }}
-      >
-        Back to Chapter List
-      </Button>
-      
-      <ChapterContainer>
-        <ChapterTitle>
-          Chapter {currentChapter.id}: {currentChapter.title}
-        </ChapterTitle>
-        {currentChapter.content ? (
-          <MarkdownRenderer content={currentChapter.content} />
-        ) : (
-          <ErrorMessage>No content available for this chapter</ErrorMessage>
-        )}
-      </ChapterContainer>
-
-      <ChapterNav justify="center">
-        <NavButton
-          onClick={() => navigateChapter('prev')}
-          disabled={!canNavigate('prev')}
-        >
-          <FontAwesomeIcon icon={faChevronLeft} /> Previous
-        </NavButton>
-        <Button
-          onClick={() => markChapterComplete(currentChapter.id)}
-          disabled={readingProgress.chaptersCompleted.includes(currentChapter.id)}
-          style={{ margin: '0 1rem' }}
-        >
-          Mark as Complete
-        </Button>
-        <NavButton
-          onClick={() => navigateChapter('next')}
-          disabled={!canNavigate('next')}
-        >
-          Next <FontAwesomeIcon icon={faChevronRight} />
-        </NavButton>
-      </ChapterNav>
-
-      <HelpButton onClick={() => setShowShortcuts(true)}>
-        <FontAwesomeIcon icon={faKeyboard} />
-      </HelpButton>
-      
-      {showShortcuts && (
-        <KeyboardShortcutsHelp 
-          shortcuts={shortcuts}
-          onClose={() => setShowShortcuts(false)}
-        />
-      )}
-    </Section>
-  );
+  // Show loading only when we have no content to display
+  return <Loading status="Loading Chapter" />;
 };
 
 export default Chapters;

@@ -6,6 +6,7 @@ const useChapters = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentChapter, setCurrentChapter] = useState(null);
+  const [loadingChapter, setLoadingChapter] = useState(false);
 
   // Load chapters index
   useEffect(() => {
@@ -33,18 +34,33 @@ const useChapters = () => {
 
   // Load specific chapter content
   const loadChapter = async (chapterId) => {
+    console.log('loadChapter called with:', { chapterId, loading, chapters: chapters.length });
+    
+    // Wait for chapters to be loaded first
+    if (loading) {
+      console.log('Waiting for chapters to load before loading chapter...');
+      return;
+    }
+
     console.log(`Starting to load chapter ${chapterId}...`);
-    setLoading(true);
+    setLoadingChapter(true);
     setError(null);
     
     try {
       const chapter = chapters.find(c => c.id === parseInt(chapterId, 10));
+      console.log('Found chapter:', chapter);
+      
       if (!chapter) {
         console.error('Chapter not found in chapters array:', { chapterId, chapters });
         throw new Error('Chapter not found');
       }
 
-      console.log('Found chapter in index:', chapter);
+      // If we already have this chapter loaded, don't reload it
+      if (currentChapter?.id === chapter.id && currentChapter?.content) {
+        console.log('Chapter already loaded:', currentChapter);
+        setLoadingChapter(false);
+        return;
+      }
 
       // Construct the correct path for the chapter file
       const chapterPath = `/chapters/chapter-${chapterId}.md`;
@@ -64,9 +80,6 @@ const useChapters = () => {
         throw new Error('Chapter content is empty');
       }
 
-      // Log the first few characters of content
-      console.log('Content preview:', content.substring(0, 100));
-
       const updatedChapter = {
         ...chapter,
         content: content
@@ -74,52 +87,75 @@ const useChapters = () => {
       console.log('Setting current chapter:', updatedChapter);
 
       setCurrentChapter(updatedChapter);
-      setLoading(false);
+      setLoadingChapter(false);
       console.log(`Successfully loaded chapter ${chapterId}`);
     } catch (err) {
       console.error(`Failed to load chapter ${chapterId}:`, err);
       setError(`Failed to load chapter ${chapterId}: ${err.message}`);
-      setLoading(false);
+      setLoadingChapter(false);
     }
   };
 
-  // Navigate to next/previous chapter
-  const navigateChapter = (direction) => {
-    if (!currentChapter) {
-      console.log('Cannot navigate: no current chapter');
-      return;
+  // Get next/previous chapter ID
+  const getAdjacentChapterId = (direction) => {
+    console.log('getAdjacentChapterId called:', { 
+      direction, 
+      currentChapter: currentChapter?.id,
+      loading,
+      chaptersLength: chapters.length
+    });
+
+    if (!currentChapter || loading || !chapters.length) {
+      console.log('Cannot get adjacent chapter: no current chapter, still loading, or no chapters');
+      return null;
     }
     
     const currentIndex = chapters.findIndex(c => c.id === currentChapter.id);
     console.log('Current chapter index:', currentIndex);
+    
     const nextIndex = direction === 'next' ? currentIndex + 1 : currentIndex - 1;
+    console.log('Next chapter index:', nextIndex);
     
     if (nextIndex >= 0 && nextIndex < chapters.length) {
-      console.log(`Navigating to ${direction} chapter:`, chapters[nextIndex].id);
-      loadChapter(chapters[nextIndex].id);
-    } else {
-      console.log('Cannot navigate:', { direction, currentIndex, nextIndex });
+      const nextChapterId = chapters[nextIndex].id;
+      console.log(`Found ${direction} chapter:`, nextChapterId);
+      return nextChapterId;
     }
+    
+    console.log('No adjacent chapter found:', { direction, currentIndex, nextIndex });
+    return null;
   };
 
   // Check if navigation is possible
   const canNavigate = (direction) => {
-    if (!currentChapter) return false;
+    if (!currentChapter || loading || !chapters.length) {
+      console.log('canNavigate: false - no current chapter, loading, or no chapters');
+      return false;
+    }
     
     const currentIndex = chapters.findIndex(c => c.id === currentChapter.id);
-    return direction === 'next' 
+    const canNav = direction === 'next' 
       ? currentIndex < chapters.length - 1
       : currentIndex > 0;
+    
+    console.log('canNavigate:', { 
+      direction, 
+      currentIndex, 
+      chaptersLength: chapters.length,
+      result: canNav 
+    });
+    
+    return canNav;
   };
 
   return {
     chapters,
     metadata,
-    loading,
+    loading: loading || loadingChapter,
     error,
     currentChapter,
     loadChapter,
-    navigateChapter,
+    getAdjacentChapterId,
     canNavigate
   };
 };
