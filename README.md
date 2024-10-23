@@ -30,7 +30,7 @@ A modern, responsive web application for experiencing "The Silicon Cage" - a cor
 
 1. Clone the repository:
 ```bash
-git clone [repository-url]
+git clone https://github.com/heffrey78/silicon-cage
 cd silicon-cage-website
 ```
 
@@ -127,4 +127,4 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## Contact
 
-Project Link: [repository-url]
+Project Link: https://github.com/heffrey78/silicon-cage
