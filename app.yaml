@@ -1,0 +1,30 @@
+runtime: nodejs18
+service: default
+
+env_variables:
+  NODE_ENV: 'production'
+
+handlers:
+  # Serve static files from the build directory
+  - url: /static
+    static_dir: build/static
+    secure: always
+
+  # Serve chapter markdown files
+  - url: /chapters/(.*)
+    static_files: build/chapters/\1
+    upload: build/chapters/.*
+    mime_type: text/markdown
+    secure: always
+
+  # Serve other static assets
+  - url: /(.*\.(json|ico|js|svg|txt|md))$
+    static_files: build/\1
+    upload: build/.*\.(json|ico|js|svg|txt|md)$
+    secure: always
+
+  # All other requests go to index.html
+  - url: /.*
+    static_files: build/index.html
+    upload: build/index.html
+    secure: always
